@@ -1,4 +1,4 @@
-import { execFile, spawn, type ChildProcess } from 'node:child_process'
+import { execFile, execFileSync, spawn, type ChildProcess } from 'node:child_process'
 import { promisify } from 'node:util'
 import path from 'node:path'
 import os from 'node:os'
@@ -14,12 +14,44 @@ const DRUMS_PATH = path.join(
 )
 
 /**
- * Plays indian drums audio via afplay (non-blocking).
- * Returns the child process so it can be killed when the popup is dismissed.
+ * Kill any orphaned osascript/afplay audio processes from previous runs.
+ * When a VS Code terminal is trashed, Node dies but audio processes can survive as orphans.
+ */
+function killOrphanedAudio(): void {
+	for (const proc of ['afplay', 'osascript']) {
+		try {
+			execFileSync('killall', [proc], { stdio: 'ignore' })
+		} catch {
+			// Not running — expected
+		}
+	}
+}
+
+/**
+ * Plays indian drums audio via NSSound (non-blocking).
+ * Uses osascript + AppKit's NSSound instead of afplay because afplay depends on
+ * the terminal's audio session context — when a VS Code terminal is trashed and
+ * restarted, afplay silently fails. NSSound talks directly to CoreAudio and has
+ * no terminal session dependency.
+ *
+ * Returns the osascript child process so it can be killed when the popup is dismissed.
  */
 function playDrums(): ChildProcess {
-	const child = spawn('afplay', [DRUMS_PATH], { stdio: 'ignore' })
-	console.log('[alert] Playing drums audio')
+	killOrphanedAudio()
+	const child = spawn('osascript', [
+		'-e', 'use framework "AppKit"',
+		'-e', 'use scripting additions',
+		'-e', `set theSound to current application's NSSound's alloc's initWithContentsOfFile:"${DRUMS_PATH}" byReference:true`,
+		'-e', 'theSound\'s play',
+		'-e', 'delay 999'
+	], { stdio: 'ignore' })
+	child.on('error', (err) => console.error('[alert] osascript spawn error:', err))
+	child.on('exit', (code) => {
+		if (code !== null && code !== 0) {
+			console.error(`[alert] osascript exited with code ${code}`)
+		}
+	})
+	console.log('[alert] Playing drums audio (NSSound)')
 	return child
 }
 

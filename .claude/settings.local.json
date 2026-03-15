@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ffmpeg -y -f lavfi -i \"anoisesrc=d=0.08:c=brown:a=0.9,highpass=f=60,lowpass=f=200\" -f lavfi -i \"anoisesrc=d=0.06:c=brown:a=0.7,highpass=f=60,lowpass=f=180\" -f lavfi -i \"anoisesrc=d=0.08:c=brown:a=0.85,highpass=f=60,lowpass=f=200\" -f lavfi -i \"anoisesrc=d=0.06:c=brown:a=0.6,highpass=f=60,lowpass=f=180\" -f lavfi -i \"anoisesrc=d=0.1:c=brown:a=1.0,highpass=f=50,lowpass=f=220\" -filter_complex \"[0]apad=pad_dur=0.15[d0];[1]apad=pad_dur=0.2[d1];[2]apad=pad_dur=0.15[d2];[3]apad=pad_dur=0.25[d3];[4]apad=pad_dur=0.1[d4];[d0][d1][d2][d3][d4]concat=n=5:v=0:a=1,afade=t=out:st=1.5:d=0.5\" ~/.claude/alerts/sounds/indian-drums.mp3)",
+      "Bash(osascript -e 'display alert \"\"Tribal Knowledge\"\" message \"\"New tribal knowledge processed:\\\\n\\\\ntest-file.md\"\" buttons {\"\"OK\"\"} default button \"\"OK\"\"')",
+      "Bash(find /Users/flavio/Portfolio/term-2-task/tasks -type f \\\\\\(-name *review* -o -name *report* \\\\\\))",
+      "Bash(bash /Users/flavio/Portfolio/tribal-knowledge/install.sh)"
+    ],
+    "additionalDirectories": [
+      "/Users/flavio/.claude/alerts",
+      "/Users/flavio/.claude/alerts/sounds"
+    ]
+  }
+}
