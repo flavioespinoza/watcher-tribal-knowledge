@@ -95,7 +95,7 @@ async function processImage(imagePath: string): Promise<void> {
 		await updateMasterReport(OUTPUT_DIR, analysis, renamedPath, filePath)
 
 		// Post-processing: drums + blocking popup + clipboard on dismiss
-		await fireAlert(filePath, heading)
+		fireAlert(filePath, heading)
 
 		console.log(`[watcher] Pipeline complete: ${filePath}`)
 	} catch (err) {
